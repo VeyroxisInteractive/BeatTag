@@ -3101,15 +3101,12 @@ async function toggleAudioRecord() {
     recorder.onstop =
       async () => {
 
-        captureBlob =
-          new Blob(
-            chunks,
-            {
-              type:
-                recorder.mimeType ||
-                'audio/webm'
-            }
-          );
+        captureBlob = new Blob(
+  chunks,
+  {
+    type: 'audio/webm'
+  }
+);
 
         captureUrl =
           await blobToDataURL(
