@@ -2920,92 +2920,209 @@ function takePhoto() {
    VIDEO
 ========================= */
 
+
 function startVideoRecord() {
 
   if (!stream) {
-
-    toast(
-      'Could not start the camera.'
-    );
-
+    toast('Could not start the camera.');
     return;
   }
 
-  if (
-    typeof MediaRecorder ===
-    'undefined'
-  ) {
-
+  if (typeof MediaRecorder === 'undefined') {
     toast(
       'This browser does not support video recording. Use Choose File instead.'
     );
-
     return;
   }
 
-  chunks = [];
+  try {
 
-  recorder =
-    new MediaRecorder(stream);
+    chunks = [];
 
-  recorder.ondataavailable =
-    e => {
+    // Pick a format supported by the current browser/WebView.
+    let options = {};
 
-      if (e.data.size) {
+    if (
+      MediaRecorder.isTypeSupported &&
+      MediaRecorder.isTypeSupported(
+        'video/webm;codecs=vp8,opus'
+      )
+    ) {
+      options.mimeType =
+        'video/webm;codecs=vp8,opus';
 
-        chunks.push(e.data);
+    } else if (
+      MediaRecorder.isTypeSupported &&
+      MediaRecorder.isTypeSupported(
+        'video/webm'
+      )
+    ) {
+      options.mimeType = 'video/webm';
+    }
 
+    recorder = new MediaRecorder(
+      stream,
+      options
+    );
+
+    recorder.ondataavailable = event => {
+
+      if (
+        event.data &&
+        event.data.size > 0
+      ) {
+        chunks.push(event.data);
       }
     };
 
-  recorder.onstop =
-    async () => {
+    recorder.onerror = event => {
 
-      captureBlob =
-        new Blob(
-          chunks,
-          {
-            type:
-              recorder.mimeType ||
-              'video/webm'
-          }
-        );
+      console.error(
+        'Video recorder error:',
+        event
+      );
 
-      captureUrl =
-        await blobToDataURL(
-          captureBlob
-        );
-
-      stopStream();
-
-      showCaptured(
-        'video'
+      toast(
+        'Video recording failed. Please try again.'
       );
     };
 
-  recorder.start();
+    recorder.onstop = () => {
 
-  const btn =
-    $('#snapBtn');
+      try {
 
-  btn.textContent =
-    '⏹ Stop Video';
+        if (!chunks.length) {
 
-  btn.onclick =
-    () => {
+          stopStream();
 
-      if (
-        recorder &&
-        recorder.state ===
-          'recording'
-      ) {
+          toast(
+            'No video was recorded. Please try again.'
+          );
 
-        recorder.stop();
+          return;
+        }
 
+        const mimeType =
+          recorder?.mimeType ||
+          chunks[0]?.type ||
+          'video/webm';
+
+        captureBlob =
+          new Blob(
+            chunks,
+            {
+              type: mimeType
+            }
+          );
+
+        if (
+          !captureBlob ||
+          captureBlob.size === 0
+        ) {
+
+          stopStream();
+
+          toast(
+            'Video is empty. Please record again.'
+          );
+
+          return;
+        }
+
+        // Do NOT convert a large video to Base64.
+        // Use a Blob URL for preview instead.
+        if (
+          captureUrl &&
+          captureUrl.startsWith('blob:')
+        ) {
+          URL.revokeObjectURL(
+            captureUrl
+          );
+        }
+
+        captureUrl =
+          URL.createObjectURL(
+            captureBlob
+          );
+
+        stopStream();
+
+        showCaptured('video');
+
+        toast('Video recorded ✅');
+
+      } catch (error) {
+
+        console.error(
+          'Video processing error:',
+          error
+        );
+
+        stopStream();
+
+        toast(
+          'Could not process the video.'
+        );
       }
     };
-}
 
+    // Generate data chunks while recording.
+    recorder.start(1000);
+
+    const btn =
+      $('#snapBtn');
+
+    if (btn) {
+
+      btn.textContent =
+        '⏹ Stop Video';
+
+      btn.onclick = () => {
+
+        if (
+          recorder &&
+          recorder.state ===
+            'recording'
+        ) {
+
+          btn.disabled = true;
+
+          try {
+
+            // Ask MediaRecorder for the final pending chunk.
+            recorder.requestData();
+
+          } catch (_) {}
+
+          setTimeout(() => {
+
+            if (
+              recorder &&
+              recorder.state ===
+                'recording'
+            ) {
+              recorder.stop();
+            }
+
+          }, 150);
+        }
+      };
+    }
+
+    toast('Video recording started 🔴');
+
+  } catch (error) {
+
+    console.error(
+      'Could not start MediaRecorder:',
+      error
+    );
+
+    toast(
+      'Could not start video recording.'
+    );
+  }
+}
 
 /* =========================
    AUDIO
