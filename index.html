@@ -137,33 +137,34 @@
 
     <div class="top-actions">
 
-      <a href="https://github.com/VeyroxisInteractive/BeatTag/releases/download/v1.0.0/BeatTag.apk"
-   download
-   title="Download BeatTag Android App"
-   style="
-     text-decoration:none;
-     color:white;
-     font-weight:700;
-     font-size:12px;
-     padding:10px 12px;
-     border-radius:14px;
-     border:1px solid #6d28d9;
-     background:linear-gradient(135deg,#7c3aed,#e11dce);
-     white-space:nowrap;
-   ">
-   ⬇ Download
-</a>
-      <button class="coin-pill" onclick="go('shop')">
-        🪙 <span id="coinCount">0</span>
-      </button>
+  <a id="androidDownloadBtn"
+     href="https://github.com/VeyroxisInteractive/BeatTag/releases/download/v1.0.0/BeatTag.apk"
+     download
+     title="Download BeatTag Android App"
+     style="
+       text-decoration:none;
+       color:white;
+       font-weight:700;
+       font-size:12px;
+       padding:10px 12px;
+       border-radius:14px;
+       border:1px solid #6d28d9;
+       background:linear-gradient(135deg,#7c3aed,#e11dce);
+       white-space:nowrap;
+     ">
+    ↓ Download
+  </a>
 
-      <button class="icon-btn" onclick="openNotifications()">
-        🔔
-        <span id="notifDot" class="dot hidden"></span>
-      </button>
+  <button class="coin-pill" onclick="go('shop')">
+    🪙 <span id="coinCount">0</span>
+  </button>
 
-    </div>
+  <button class="icon-btn" onclick="openNotifications()">
+    🔔
+    <span id="notifDot" class="dot hidden"></span>
+  </button>
 
+</div>
   </header>
 
 
