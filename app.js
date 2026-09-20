@@ -6051,68 +6051,84 @@ function btMusicRenderYouTube(tracks) {
 function btPlayYouTube(videoId, title = 'YouTube') {
   if (!videoId) return;
 
-  const old = document.getElementById('btYouTubePlayer');
-  if (old) old.remove();
+  document.getElementById('btYouTubePlayer')?.remove();
 
   const player = document.createElement('div');
-
   player.id = 'btYouTubePlayer';
 
   player.style.cssText = `
     position:fixed;
-    left:12px;
-    right:12px;
-    bottom:82px;
-    z-index:9998;
-    background:#0d0a12;
-    border:1px solid #5d2a88;
-    border-radius:18px;
-    padding:10px;
-    box-shadow:0 12px 40px rgba(0,0,0,.55);
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:99999;
+    background:#000;
+    display:flex;
+    flex-direction:column;
   `;
 
   player.innerHTML = `
     <div style="
+      height:56px;
+      min-height:56px;
       display:flex;
-      justify-content:space-between;
       align-items:center;
-      gap:10px;
-      margin-bottom:8px;
+      gap:12px;
+      padding:0 14px;
+      background:#0b0810;
+      color:#fff;
     ">
-      <strong style="
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
-      ">
-        ${escapeHTML(title)}
-      </strong>
-
       <button
         type="button"
-        onclick="document.getElementById('btYouTubePlayer')?.remove()"
+        id="btYoutubeBack"
         style="
           border:0;
           background:transparent;
-          color:white;
-          font-size:22px;
-        ">
-        ×
-      </button>
+          color:#fff;
+          font-size:28px;
+          padding:6px;
+        ">←</button>
+
+      <strong style="
+        flex:1;
+        overflow:hidden;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+      ">${escapeHTML(title)}</strong>
+
+      <button
+        type="button"
+        id="btYoutubeClose"
+        style="
+          border:0;
+          background:transparent;
+          color:#fff;
+          font-size:28px;
+          padding:6px;
+        ">×</button>
     </div>
 
     <iframe
-      width="100%"
-      height="190"
       src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&playsinline=1"
       title="YouTube player"
       frameborder="0"
-      allow="autoplay; encrypted-media; picture-in-picture"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
       allowfullscreen
-      style="border-radius:12px;display:block;">
+      style="
+        width:100%;
+        flex:1;
+        border:0;
+        background:#000;
+      ">
     </iframe>
   `;
 
   document.body.appendChild(player);
+
+  const closePlayer = () => player.remove();
+
+  player.querySelector('#btYoutubeBack').onclick = closePlayer;
+  player.querySelector('#btYoutubeClose').onclick = closePlayer;
 }
 function btMusicRenderList(){
   const el=$('#btMusicList'); if(!el)return;
