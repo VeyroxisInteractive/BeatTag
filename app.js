@@ -1,3 +1,4 @@
+const YOUTUBE_API_KEY = "AIzaSyBkcL-6C0gqB-RvoJPpW9DSJvX40N_-lsY";
 const SUPABASE_URL = "https://axllkismvbqikwdvkayz.supabase.co";
 
 const SUPABASE_KEY = "sb_publishable_vtacQ7gTtSepf4BSzlAQmw_aOJI3Yvw";
