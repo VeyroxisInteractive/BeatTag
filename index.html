@@ -212,9 +212,15 @@
 
 
     <button data-tab="music" onclick="go('music')" aria-label="Music">
-      <span class="nav-icon" aria-hidden="true" style="font-size:20px">♫</span>
-      <small>Music</small>
-    </button>
+  <span class="nav-icon">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 18V5l11-2v13"/>
+      <circle cx="6" cy="18" r="3"/>
+      <circle cx="17" cy="16" r="3"/>
+    </svg>
+  </span>
+  <small>Music</small>
+</button>
 
     <button data-tab="profile" onclick="go('profile')" aria-label="Profile">
       <span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span>
