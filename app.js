@@ -877,8 +877,14 @@ let currentTab = 'home';
 let currentFeedMode = 'all';
 let exploreSearchTimer = null;
 let searchRequestToken = 0;
-function go(tab) {
-currentTab = tab;
+window.scrollTo({
+  top: 0,
+  left: 0,
+  behavior: 'instant'
+});
+
+document.documentElement.scrollTop = 0;
+document.body.scrollTop = 0;
   document.body.classList.remove('bt-chat-open');
   document.querySelector('.bottom-nav')?.classList.remove('bt-chat-hidden');
   setBeatTagBannerVisible(tab==='home');
