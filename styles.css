@@ -1897,3 +1897,46 @@ main{padding-bottom:calc(132px + env(safe-area-inset-bottom))}
 .music-upload-grid{display:grid;gap:12px}.music-upload-grid input,.music-upload-grid select,.music-upload-grid textarea{width:100%;background:#15101d;border:1px solid var(--border);color:#fff;border-radius:12px;padding:12px}
 .music-progress{height:3px;background:#31243e;border-radius:99px;overflow:hidden;grid-column:1/-1}.music-progress span{display:block;height:100%;background:linear-gradient(90deg,#7c3cff,#f030d8);width:0}
 @media(max-width:390px){.bottom-nav button small{font-size:6.8px}.bottom-nav .nav-icon{width:18px;height:18px;flex-basis:18px}}
+/* ===== BeatTag Bottom Navigation Center Fix ===== */
+
+.bottom-nav {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-evenly !important;
+
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+
+  width: 100% !important;
+  max-width: 100% !important;
+
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  box-sizing: border-box !important;
+}
+
+.bottom-nav button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  text-align: center !important;
+}
+
+.bottom-nav .nav-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.bottom-nav small {
+  width: 100% !important;
+  text-align: center !important;
+}
