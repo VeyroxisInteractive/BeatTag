@@ -5940,7 +5940,180 @@ async function renderMusic(query=''){
   btMusicRenderList();
   btMusicMountMini();
 }
-function btMusicSearchNow(){renderMusic(($('#btMusicSearch')?.value||'').trim())}
+async function btMusicSearchNow() {
+  const query = ($('#btMusicSearch')?.value || '').trim();
+
+  if (!query) {
+    await renderMusic();
+    return;
+  }
+
+  const list = $('#btMusicList');
+
+  if (list) {
+    list.innerHTML = '<div class="music-empty">Searching BeatTag + YouTube…</div>';
+  }
+
+  // First load BeatTag creator uploads
+  await btMusicLoad(query);
+  btMusicRenderList();
+
+  // Then search YouTube
+  try {
+    const params = new URLSearchParams({
+      part: 'snippet',
+      type: 'video',
+      q: query + ' music',
+      maxResults: '12',
+      videoEmbeddable: 'true',
+      videoSyndicated: 'true',
+      safeSearch: 'moderate',
+      key: YOUTUBE_API_KEY
+    });
+
+    const response = await fetch(
+      'https://www.googleapis.com/youtube/v3/search?' + params.toString()
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('YouTube API error:', data);
+      toast('YouTube search unavailable.');
+      return;
+    }
+
+    const youtubeTracks = (data.items || [])
+      .filter(item => item?.id?.videoId)
+      .map(item => ({
+        source: 'youtube',
+        videoId: item.id.videoId,
+        title: item.snippet?.title || 'YouTube Music',
+        artist: item.snippet?.channelTitle || 'YouTube',
+        cover:
+          item.snippet?.thumbnails?.medium?.url ||
+          item.snippet?.thumbnails?.default?.url ||
+          ''
+      }));
+
+    btMusicRenderYouTube(youtubeTracks);
+
+  } catch (err) {
+    console.error('YouTube search failed:', err);
+    toast('Could not search YouTube.');
+  }
+}
+
+function btMusicRenderYouTube(tracks) {
+  const list = $('#btMusicList');
+
+  if (!list || !tracks.length) return;
+
+  const heading = document.createElement('div');
+  heading.className = 'music-source-heading';
+  heading.innerHTML = '<strong>YouTube Music</strong>';
+
+  list.appendChild(heading);
+
+  tracks.forEach(track => {
+    const row = document.createElement('div');
+    row.className = 'music-track';
+
+    row.innerHTML = `
+      <img
+        class="music-cover"
+        src="${escapeAttr(track.cover)}"
+        alt=""
+      >
+
+      <div class="music-track-info">
+        <strong>${escapeHTML(track.title)}</strong>
+        <small>${escapeHTML(track.artist)} · YouTube</small>
+      </div>
+
+      <button
+        class="music-play"
+        type="button">
+        ▶
+      </button>
+    `;
+
+    row.querySelector('.music-play').onclick = () =>
+      btPlayYouTube(track.videoId, track.title);
+
+    row.querySelector('.music-track-info').onclick = () =>
+      btPlayYouTube(track.videoId, track.title);
+
+    list.appendChild(row);
+  });
+}
+
+function btPlayYouTube(videoId, title = 'YouTube') {
+  if (!videoId) return;
+
+  const old = document.getElementById('btYouTubePlayer');
+  if (old) old.remove();
+
+  const player = document.createElement('div');
+
+  player.id = 'btYouTubePlayer';
+
+  player.style.cssText = `
+    position:fixed;
+    left:12px;
+    right:12px;
+    bottom:82px;
+    z-index:9998;
+    background:#0d0a12;
+    border:1px solid #5d2a88;
+    border-radius:18px;
+    padding:10px;
+    box-shadow:0 12px 40px rgba(0,0,0,.55);
+  `;
+
+  player.innerHTML = `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:8px;
+    ">
+      <strong style="
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      ">
+        ${escapeHTML(title)}
+      </strong>
+
+      <button
+        type="button"
+        onclick="document.getElementById('btYouTubePlayer')?.remove()"
+        style="
+          border:0;
+          background:transparent;
+          color:white;
+          font-size:22px;
+        ">
+        ×
+      </button>
+    </div>
+
+    <iframe
+      width="100%"
+      height="190"
+      src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&playsinline=1"
+      title="YouTube player"
+      frameborder="0"
+      allow="autoplay; encrypted-media; picture-in-picture"
+      allowfullscreen
+      style="border-radius:12px;display:block;">
+    </iframe>
+  `;
+
+  document.body.appendChild(player);
+}
 function btMusicRenderList(){
   const el=$('#btMusicList'); if(!el)return;
   if(!btMusicTracks.length){el.innerHTML='<div class="music-empty">No tracks yet. Artists can upload the first original or authorized song.</div>';return}
