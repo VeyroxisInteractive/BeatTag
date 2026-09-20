@@ -6057,84 +6057,362 @@ function btMusicRenderYouTube(tracks) {
 function btPlayYouTube(videoId, title = 'YouTube') {
   if (!videoId) return;
 
+  // Remove old player
   document.getElementById('btYouTubePlayer')?.remove();
 
   const player = document.createElement('div');
   player.id = 'btYouTubePlayer';
 
-  player.style.cssText = `
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:99999;
-    background:#000;
-    display:flex;
-    flex-direction:column;
-  `;
+  let currentMode = 'mini';
 
   player.innerHTML = `
-    <div style="
-      height:56px;
-      min-height:56px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:0 14px;
-      background:#0b0810;
-      color:#fff;
-    ">
-      <button
-        type="button"
-        id="btYoutubeBack"
-        style="
-          border:0;
-          background:transparent;
-          color:#fff;
-          font-size:28px;
-          padding:6px;
-        ">←</button>
+    <div id="btYTBox">
 
-      <strong style="
-        flex:1;
-        overflow:hidden;
-        white-space:nowrap;
-        text-overflow:ellipsis;
-      ">${escapeHTML(title)}</strong>
+      <div id="btYTHeader">
 
-      <button
-        type="button"
-        id="btYoutubeClose"
-        style="
-          border:0;
-          background:transparent;
-          color:#fff;
-          font-size:28px;
-          padding:6px;
-        ">×</button>
+        <strong id="btYTTitle">
+          ${escapeHTML(title)}
+        </strong>
+
+        <button
+          type="button"
+          id="btYTVertical"
+          title="Vertical fullscreen"
+          aria-label="Vertical fullscreen"
+        >▯</button>
+
+        <button
+          type="button"
+          id="btYTFullscreen"
+          title="Fullscreen"
+          aria-label="Fullscreen"
+        >⛶</button>
+
+        <button
+          type="button"
+          id="btYTClose"
+          title="Close"
+          aria-label="Close"
+        >×</button>
+
+      </div>
+
+      <div id="btYTVideoWrap">
+
+        <iframe
+          id="btYTFrame"
+          src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&playsinline=1"
+          title="${escapeHTML(title)}"
+          frameborder="0"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowfullscreen>
+        </iframe>
+
+      </div>
+
     </div>
-
-    <iframe
-      src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&playsinline=1"
-      title="YouTube player"
-      frameborder="0"
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-      allowfullscreen
-      style="
-        width:100%;
-        flex:1;
-        border:0;
-        background:#000;
-      ">
-    </iframe>
   `;
 
   document.body.appendChild(player);
 
-  const closePlayer = () => player.remove();
+  const box =
+    player.querySelector('#btYTBox');
 
-  player.querySelector('#btYoutubeBack').onclick = closePlayer;
-  player.querySelector('#btYoutubeClose').onclick = closePlayer;
+  const header =
+    player.querySelector('#btYTHeader');
+
+  const videoWrap =
+    player.querySelector('#btYTVideoWrap');
+
+  const frame =
+    player.querySelector('#btYTFrame');
+
+  const titleEl =
+    player.querySelector('#btYTTitle');
+
+  const verticalBtn =
+    player.querySelector('#btYTVertical');
+
+  const fullscreenBtn =
+    player.querySelector('#btYTFullscreen');
+
+  const closeBtn =
+    player.querySelector('#btYTClose');
+
+
+  // ==================================================
+  // COMMON STYLE
+  // ==================================================
+
+  player.style.cssText = `
+    position:fixed;
+    z-index:99999;
+  `;
+
+  header.style.cssText = `
+    height:42px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 10px;
+    box-sizing:border-box;
+    background:#0d0a12;
+    color:#fff;
+  `;
+
+  titleEl.style.cssText = `
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:13px;
+  `;
+
+  [verticalBtn, fullscreenBtn, closeBtn].forEach(btn => {
+
+    btn.style.cssText = `
+      width:34px;
+      height:34px;
+      padding:0;
+      border:0;
+      border-radius:9px;
+      background:#21172c;
+      color:#fff;
+      font-size:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+    `;
+  });
+
+  videoWrap.style.cssText = `
+    position:relative;
+    background:#000;
+    overflow:hidden;
+  `;
+
+  frame.style.cssText = `
+    display:block;
+    width:100%;
+    height:100%;
+    border:0;
+    background:#000;
+  `;
+
+
+  // ==================================================
+  // MINI PLAYER
+  // ==================================================
+
+  function showMini() {
+
+    currentMode = 'mini';
+
+    player.style.cssText = `
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:82px;
+      z-index:99999;
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+    `;
+
+    box.style.cssText = `
+      width:100%;
+      max-width:520px;
+      background:#0d0a12;
+      border:1px solid #5d2a88;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 12px 40px rgba(0,0,0,.55);
+      pointer-events:auto;
+    `;
+
+    header.style.display = 'flex';
+
+    videoWrap.style.cssText = `
+      position:relative;
+      width:100%;
+      aspect-ratio:16 / 9;
+      background:#000;
+      overflow:hidden;
+    `;
+
+    verticalBtn.style.display = 'flex';
+    fullscreenBtn.style.display = 'flex';
+
+    document.body.style.overflow = '';
+  }
+
+
+  // ==================================================
+  // NORMAL FULLSCREEN
+  // ==================================================
+
+  function showFullscreen() {
+
+    currentMode = 'fullscreen';
+
+    player.style.cssText = `
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:99999;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    `;
+
+    box.style.cssText = `
+      width:100%;
+      height:100%;
+      background:#000;
+      display:flex;
+      flex-direction:column;
+      border-radius:0;
+      overflow:hidden;
+    `;
+
+    header.style.display = 'flex';
+
+    videoWrap.style.cssText = `
+      flex:1;
+      width:100%;
+      min-height:0;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    `;
+
+    frame.style.cssText = `
+      width:100%;
+      height:100%;
+      border:0;
+      background:#000;
+    `;
+
+    verticalBtn.style.display = 'flex';
+    fullscreenBtn.style.display = 'none';
+
+    document.body.style.overflow = 'hidden';
+  }
+
+
+  // ==================================================
+  // VERTICAL 9:16 FULLSCREEN
+  // ==================================================
+
+  function showVertical() {
+
+    currentMode = 'vertical';
+
+    player.style.cssText = `
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:99999;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    `;
+
+    box.style.cssText = `
+      width:100%;
+      height:100%;
+      background:#000;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      overflow:hidden;
+      border-radius:0;
+    `;
+
+    header.style.display = 'flex';
+    header.style.width = '100%';
+
+    videoWrap.style.cssText = `
+      flex:1;
+      min-height:0;
+      width:100%;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    `;
+
+    frame.style.cssText = `
+      width:min(100vw, calc((100vh - 42px) * 9 / 16));
+      height:min(calc(100vh - 42px), calc(100vw * 16 / 9));
+      max-width:100%;
+      max-height:100%;
+      border:0;
+      background:#000;
+    `;
+
+    verticalBtn.style.display = 'none';
+    fullscreenBtn.style.display = 'flex';
+
+    document.body.style.overflow = 'hidden';
+  }
+
+
+  // ==================================================
+  // BUTTONS
+  // ==================================================
+
+  fullscreenBtn.onclick = () => {
+
+    if (currentMode === 'fullscreen') {
+      showMini();
+    } else {
+      showFullscreen();
+    }
+  };
+
+
+  verticalBtn.onclick = () => {
+
+    if (currentMode === 'vertical') {
+      showMini();
+    } else {
+      showVertical();
+    }
+  };
+
+
+  closeBtn.onclick = () => {
+
+    // Fullscreen/Vertical -> first return to mini
+    if (
+      currentMode === 'fullscreen' ||
+      currentMode === 'vertical'
+    ) {
+
+      showMini();
+      return;
+    }
+
+    // Mini -> close player completely
+    document.body.style.overflow = '';
+    player.remove();
+  };
+
+
+  // ==================================================
+  // START IN ORIGINAL MINI MODE
+  // ==================================================
+
+  showMini();
 }
 function btMusicRenderList(){
   const el=$('#btMusicList'); if(!el)return;
