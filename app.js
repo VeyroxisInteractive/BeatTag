@@ -1427,6 +1427,7 @@ function getBeatTagNativeAdPositions(itemCount) {
 
   return positions.filter(position => position <= itemCount);
 }
+let beatTagNativeAdAvailable = true;
 
 function createBeatTagNativeAdSlot(section, position) {
   const slot = document.createElement('div');
@@ -1434,12 +1435,15 @@ function createBeatTagNativeAdSlot(section, position) {
   slot.dataset.nativeAdSlot = `${section}-${position}`;
   slot.setAttribute('aria-label', 'Sponsored advertisement');
   slot.style.width = '100%';
-  slot.style.height = '300px';
-  slot.style.margin = '14px 0';
+  slot.style.height = beatTagNativeAdAvailable ? '300px' : '0px';
+slot.style.margin = beatTagNativeAdAvailable ? '14px 0' : '0';
+slot.style.display = beatTagNativeAdAvailable ? 'block' : 'none';
   slot.style.pointerEvents = 'none';
   return slot;
 }
 window.onBeatTagNativeAdFailed = function () {
+  beatTagNativeAdAvailable = false;
+
   document
     .querySelectorAll('.bt-native-ad-slot')
     .forEach(slot => {
