@@ -1439,6 +1439,15 @@ function createBeatTagNativeAdSlot(section, position) {
   slot.style.pointerEvents = 'none';
   return slot;
 }
+window.onBeatTagNativeAdFailed = function () {
+  document
+    .querySelectorAll('.bt-native-ad-slot')
+    .forEach(slot => {
+      slot.style.height = '0px';
+      slot.style.margin = '0';
+      slot.style.display = 'none';
+    });
+};
 
 function shouldInsertBeatTagNativeAd(position, total) {
   return position <= total && getBeatTagNativeAdPositions(total).includes(position);
